@@ -1,25 +1,38 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { off } from "process";
+import React, { useEffect, useState } from "react";
+import MainPage from "./components/MainPage";
+import Pgination from "./components/Pagination";
 
 function App() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const getUsers = async (number: number) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `http://xoosha.com/ws/1/test.php?offset=${number}`
+      );
+      const data = await response.json();
+      const images: any = [];
+      data?.map((item: any) => {images.push({image:item.image_url,name: item.name, price:item.price, productPage:item.url})
+      });
+      setData(images);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    getUsers(0);
+
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+     <>
+      <MainPage data={data} loading={loading}/>
+     <Pgination handleClick={(offset: number)=>{
+        window.scrollTo(0, 0)
+       getUsers(offset)}}/>
+     </>
   );
 }
 
